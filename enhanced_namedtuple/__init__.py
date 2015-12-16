@@ -2,7 +2,7 @@ from collections import namedtuple as orig_namedtuple
 try:
     from abc import ABCMeta
 except ImportError:
-    # For versions of Python before abstract base classes
+    # For rare versions of Python before abstract base classes
     ABCMeta = type
 
 __all__ = ['namedtuple']
@@ -13,11 +13,15 @@ class namedtuple_meta(ABCMeta):
         try:
             return mcls.__instance
         except AttributeError:
-            # If we don't have abstract base classes, replace 'register' with a dummy.    
-            dct = {'register': lambda *args, **kw: None} if ABCMeta is type else {}
-            cls = ABCMeta.__new__(mcls, 'namedtuple', (tuple,), dct)
+            cls = ABCMeta.__new__(mcls, 'namedtuple', (tuple,), {})
             mcls.__instance = cls
             return cls
+
+    # If ABCMeta is not available, override
+    # virtual subclass registration with a dummy
+    if ABCMeta is type:
+        def register(mcls, cls):
+            pass
 
     def __new__(mcls, name, bases, dct):
         _fields = dct.pop('_fields', None)

@@ -1,7 +1,10 @@
 from __future__ import absolute_import
 
 import unittest
-from abc import ABCMeta
+try:
+    from abc import ABCMeta
+except ImportError:
+    ABCMeta = type
 from enhanced_namedtuple import namedtuple
 
 class test_namedtuple_setup(unittest.TestCase):
