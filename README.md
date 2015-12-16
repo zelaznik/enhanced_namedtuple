@@ -28,11 +28,13 @@ The current choices for adding functionality to tuples are subpar.  Offering one
 1. Adding an extra subclass to the inheritence chain.
 ```python
 class Point(namedtuple('Point',('x','y'))):
+    ''' This makes debugging harder.  A child has the same class name as its parent.
+        If we rename the parent class, for example 'BasePoint', now the __repr__ function
+        for the child class displays the name of the parent.  Finally, there's no need to
+        add a second lookup in the `__mro__` chain. '''
     def __abs__(self):
         return sqrt(self.x**2+self.y**2+self.z**2)
 ```
-⋅⋅* This makes debugging harder.  A child has the same class name as its parent.
-⋅⋅* Also, there's no need to add a second lookup in the `__mro__` chain.
 
 class Point(namedtuple('BasePoint',('x','y'))):
     ''' No name conflict, but now the '__repr__' function displays the wrong class name. '''
