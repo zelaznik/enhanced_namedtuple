@@ -31,10 +31,13 @@ Coders can add in their own custom functionality into a namedtuple, never needin
 
 This is accomplished by creating a special singleton metaclass `namedtuple_meta`, whose only instance is `namedtuple`.  The `__new__`, and `__call__` methods are overridden for `namedtuple_meta`.
 
-
 ### Implementation:
 
 When a developer subclasses from `namedtuple`, the `__new__` method is invoked, and the new named tuple, with the user's custom modifications, is created and returned.  When creating the `namedtuple` singleton, we have to bypass the overridden `namedtuple_meta.__new__` method.  This is done by calling `ABCMeta.__new__` directly and passing in `namedtuple_meta` as its first argument.
+
+### Motivation
+
+For read-only operations to a database, a modified `namedtuple` works great as a lightweight object relational mapper.  For algorithmic calculations, storing coordinate data in a tuple is efficient, after overloading the mathematical operators, code becomes much more expressive.
 
 Python should encourage the use of immutable objects, which means making their use as simple and elegant as possible.  The current choices for adding functionality to tuples are subpar.  Offering one of three choices:
 
@@ -66,12 +69,6 @@ class Point(tuple):
         return sqrt(self.x**2+self.y**2+self.z**2)
 ```
 Now it's easy to forget things.  Notice here I left out `__slots__`, so a new dictionary is created for each instance of the tuple.  A novice developer might make my other optimization mistake by using `lambda` rather than `operator.itemgetter`.
-
-### Motivation
-
-I'm a fan of immutable objects and wish Python would gently nudge users in that direction.  A lot of classes in Python are for read-only purposes, so it makes sense to turn them into tuples.  Spare the risk custom property getter and setter methods.
-
-For read-only operations to a database, a modified `namedtuple` works great as a lightweight object relational mapper.  For algorithmic calculations, storing coordinate data in a tuple is efficient, after overloading the mathematical operators, code becomes much more expressive.
 
 ### Rationale
 
