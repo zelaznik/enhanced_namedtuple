@@ -33,31 +33,28 @@ Python should encourage the use of immutable objects, which means making their u
 ##### 1\. Adding an extra subclass to the inheritence chain.
 ```python
 class Point(namedtuple('Point',('x','y'))):
-    ''' This makes debugging harder.  A child has the same class name as its parent.
-        If we rename the parent class, for example 'BasePoint', now the __repr__ function
-        for the child class displays the name of the parent.  Finally, there's no need to
-        add a second lookup in the `__mro__` chain. '''
     def __abs__(self):
         return sqrt(self.x**2+self.y**2+self.z**2)
 ```
+This makes debugging harder.  A child has the same class name as its parent.  If we rename the parent class, for example 'BasePoint', now the __repr__ function  for the child class displays the name of the parent.  Finally, the parent `namedtuple` will never be reused, so nothing is gained adding a second class lookup in the `__mro__` chain.
 
 ##### 2\. Monkey patching
 ```python
 Point = namedtuple('Point',('x','y'))
 def __abs__(self):
-    ''' Monkey patching looks even uglier. '''
     return sqrt(self.x**2+self.y**2+self.z**2)
 Point.__abs__ = __abs__
 ```
+This is ugly and hard to follow.  I've done this in code.  Learn from my mistakes.
 
 ##### 3\. Build your own
 ```python
 class Point(tuple):
-    ''' Lots of boilerplate code, even more room for bugs. '''
-    x, y, z = (property(itemgetter(_) for _ in range(3)))
+    x = property(itemgetter(0))
     y = property(itemgetter(1))
     def __new__(cls, x, y):
         return tuple.__new__(cls, (x,y))
     def __abs__(self):
         return sqrt(self.x**2+self.y**2+self.z**2)
 ```
+Now it's easy to forget things.  Notice here I left out `__slots__`, so a new dictionary is created for each instance of the tuple.
