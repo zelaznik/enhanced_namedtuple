@@ -31,6 +31,7 @@ Coders can add in their own custom functionality into a namedtuple, never needin
 
 This is accomplished by creating a special singleton metaclass `namedtuple_meta`, whose only instance is `namedtuple`.  The `__new__`, and `__call__` methods are overridden for `namedtuple_meta`.
 
+
 ### Implementation:
 
 When a developer subclasses from `namedtuple`, the `__new__` method is invoked, and the new named tuple, with the user's custom modifications, is created and returned.  When creating the `namedtuple` singleton, we have to bypass the overridden `namedtuple_meta.__new__` method.  This is done by calling `ABCMeta.__new__` directly and passing in `namedtuple_meta` as its first argument.
@@ -68,11 +69,29 @@ Now it's easy to forget things.  Notice here I left out `__slots__`, so a new di
 
 ### Motivation
 
-I'm a fan of immutable objects and wish Python would nudge users in that direction.  A lot of classes in Python are for read-only purposes, so it makes sense to turn them into tuples.  Then they can be quickly compared, not to mention easily stored in hashes.  For read-only operations to a database, a modified `namedtuple` works great as a lightweight object relational mapper.  For algorithmic calculations, storing coordinate data in a tuple is efficient, after overloading the mathematical operators, code becomes much more expressive.
+I'm a fan of immutable objects and wish Python would gently nudge users in that direction.  A lot of classes in Python are for read-only purposes, so it makes sense to turn them into tuples.  Spare the risk custom property getter and setter methods.
+
+For read-only operations to a database, a modified `namedtuple` works great as a lightweight object relational mapper.  For algorithmic calculations, storing coordinate data in a tuple is efficient, after overloading the mathematical operators, code becomes much more expressive.
 
 ### Rationale
 
-The rationale fleshes out the specification by describing what motivated the design and why particular design decisions were made.  It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other languages. The rationale should provide evidence of consensus within the community and discuss important objections or concerns raised during discussion.
+I considered a number of different alternatives, and absract-base-classes were the most consistent.  Here are a few alternatives, and my reasons for not going in that direction.
+
+##### Alternative 1\. Decorator pattern
+```python
+@namedtuple
+class Point(tuple):
+    _fields = ('x','y')
+```
+This becomes redundant.  If we're inheriing from namedtuple, shouldn't we automatically inherit from tuple too?  What if we don't include tuple as a base case?  Now the code is a little less clear to those who follow it.  Plus for object relational mapping purposes, much of the metaprogramming needs to occure BEFORE the class is created, not after.
+
+##### Alternative 2\. Metaclass pattern
+```python
+class Point:
+    __metaclass__ = namedtuple
+    _fields = ('x','y')
+```
+The incompatibilities between Python2 and Python3 metaclass syntax means this implementation would neutralize all the benefits I've previously laid out.  Furthermore when talking in plain spoken language about classes created by `collections.namedtuple` we usually say it **is a** named tuple.  That wording screams out that the inheritance pattern makes the most sense.
 
 ### Backwards Compatibility
 Fully backward compatible through 2.4, when `collections.namedtuple` was first introduced into the standard library.
