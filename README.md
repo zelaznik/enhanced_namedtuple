@@ -30,7 +30,7 @@ Coders can add in their own custom functionality into a namedtuple, never needin
 
 Python should encourage the use of immutable objects, which means making their use as simple and elegant as possible.  The current choices for adding functionality to tuples are subpar.  Offering one of three choices:
 
-#### 1\. Adding an extra subclass to the inheritence chain.
+##### 1\. Adding an extra subclass to the inheritence chain.
 ```python
 class Point(namedtuple('Point',('x','y'))):
     ''' This makes debugging harder.  A child has the same class name as its parent.
@@ -41,7 +41,7 @@ class Point(namedtuple('Point',('x','y'))):
         return sqrt(self.x**2+self.y**2+self.z**2)
 ```
 
-#### 2\. Monkey patching
+##### 2\. Monkey patching
 ```python
 Point = namedtuple('Point',('x','y'))
 def __abs__(self):
@@ -50,7 +50,7 @@ def __abs__(self):
 Point.__abs__ = __abs__
 ```
 
-#### 3\. Build your own
+##### 3\. Build your own
 ```python
 class Point(tuple):
     ''' Lots of boilerplate code, even more room for bugs. '''
