@@ -80,15 +80,18 @@ I considered a number of different alternatives, and absract-base-classes were t
 class Point(tuple):
     _fields = ('x','y')
 ```
-This becomes redundant.  If we're inheriing from namedtuple, shouldn't we automatically inherit from tuple too?  What if we don't include tuple as a base case?  Now the code is a little less clear to those who follow it.  Plus for object relational mapping purposes, much of the metaprogramming needs to occure BEFORE the class is created, not after.
+This becomes redundant.  If we're inheriing from namedtuple, shouldn't we automatically inherit from tuple too?  What if we don't include tuple as a base case?  Now the code is a little less clear to those who follow it.  Also class decorators run after a class has been declared.  If class is declared in a way that's invalid, the decorator will raise an Exception, but this old, invlid, undecorated class will still exist in the local variable namespace.  Putting the logic inside a metaclass means we can stop the code before any invalid classes are created.
 
-##### Alternative 2\. Metaclass pattern
+##### Alternative 2\. Using a metaclass rather than inheritance to declare classes
 ```python
 class Point:
     __metaclass__ = namedtuple
     _fields = ('x','y')
 ```
-The incompatibilities between Python2 and Python3 metaclass syntax means this implementation would neutralize all the benefits I've previously laid out.  Furthermore when talking in plain spoken language about classes created by `collections.namedtuple` we usually say it **is a** named tuple.  That wording screams out that the inheritance pattern makes the most sense.
+The incompatible metaclass syntax between Python2 and Python3 would neutralize all the benefits I've previously laid out. 
+
+##### Finally, the 'plain english' test
+When talking casually with other Python developers, when referring to classes created by `collections.namedtuple` we usually say it **is a** named tuple.  That wording screams out that the **inheritance** above all else.
 
 ### Backwards Compatibility
 Fully backward compatible through 2.4, when `collections.namedtuple` was first introduced into the standard library.
