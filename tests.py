@@ -2,12 +2,6 @@ from __future__ import absolute_import
 
 import unittest
 from abc import ABCMeta
-
-import sys, os
-b, _ = os.path.split(__file__)
-if b not in sys.path:
-    sys.path.insert(0, b)
-
 from enhanced_namedtuple import namedtuple
 
 class test_namedtuple_setup(unittest.TestCase):
@@ -20,7 +14,7 @@ class test_namedtuple_setup(unittest.TestCase):
         assert not issubclass(namedtuple, type)
 
     def test_namedtuple__name__is_namedtuple(self):
-        assert namedtuple.__name__ == 'namedtuple'
+        self.assertEqual(namedtuple.__name__, 'namedtuple')
 
     def test_namedtuple_is_subclass_of_tuple(self):
         assert issubclass(namedtuple, tuple)
@@ -36,9 +30,9 @@ class test_namedtuple_invokation(unittest.TestCase):
             def __abs__(self):
                 return (self.x **2 + self.y **2) ** 0.5
         Point = namedtuple('Point',('x','y'))
+
         self.Vector = Vector
         self.Point = Point
-
         self.p = Point(3,4)
         self.v = Vector(3,4)
 
@@ -198,6 +192,7 @@ class test_namedtuple_conventions_strictly_enforced(unittest.TestCase):
                 __slots__ = ('abs',)
                 _fields = ('x','y')
         self.assertRaises(TypeError, block)
+
 
 if __name__ == '__main__':
     unittest.main()
