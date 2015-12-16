@@ -3,7 +3,7 @@
 
 - This is my draft proposal to make a small modification to the `collections.namedtuple` library.
 - I've never made a PEP.  I welcome all constructive feedback, negative, positve, or neutral.
-- Whatever Python says, (probably no), this package has been tested for standalone distribution.
+- Whatever Python says, (probably rejected), this package has been tested for standalone distribution.
 - Add a new interface to the `namedtuple` factory method for use as an abstract base class.
 - Interface maintains backward compatibility with all previous versions of Python.
 
@@ -11,13 +11,14 @@
 
 ### Abstract:
 
-Modify `collections.namedtuple` so it also functions as an abstract base class.  This would allow named `tuple` classes to be declared using more Pythonic code.  The interface would maintain backward compatibility.  This code still works:
+Modify `collections.namedtuple` so it also functions as an abstract base class.  The interface would maintain backward compatibility.  This code still works:
 
 ```python
 Vector = namedtuple('Vector', ('x','y','z'), verbose=True, rename=False)
 ```
 
-But this PEP makes a `namedtuple` declaration look and feel like the rest of Python.
+But this PEP makes a `namedtuple` declaration look and feel like the rest of Python.  By inheriting from `namedtuple`, the code is clearer, more reliable, and gives the user more power.
+
 ```python
 class Point(namedtuple):
     ''' Simple, customizable, reliable interface. '''
@@ -27,6 +28,12 @@ class Point(namedtuple):
 ```
 
 Coders can add in their own custom functionality into a namedtuple, never needing to wory about low level tasks such as the `__slots__`, `__new__`, and `__getnewargs__` methods.  That boilerplate code would still be delegated to the original `collections.namedtuple` factory method.
+
+This is accomplished by creating a special singleton metaclass `namedtuple_meta`, whose only instance is `namedtuple`.  The `__new__`, and `__call__` methods are overridden for `namedtuple_meta`.
+
+### Implementation:
+
+When a developer subclasses from `namedtuple`, the `__new__` method is invoked, and the new named tuple, with the user's custom modifications, is created and returned.  When creating the `namedtuple` singleton, we have to bypass the overridden `namedtuple_meta.__new__` method.  This is done by calling `ABCMeta.__new__` directly and passing in `namedtuple_meta` as its first argument.
 
 Python should encourage the use of immutable objects, which means making their use as simple and elegant as possible.  The current choices for adding functionality to tuples are subpar.  Offering one of three choices:
 
