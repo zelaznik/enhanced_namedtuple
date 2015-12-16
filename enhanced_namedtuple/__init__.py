@@ -2,44 +2,22 @@ from collections import namedtuple as orig_namedtuple
 from abc import ABCMeta, abstractmethod, abstractproperty
 __all__ = ['namedtuple']
 
-class namedtuple_surrogate(ABCMeta):
-    """ Singleton class.  Its only instance, called 'namedtupole' can be both
-        subclassed and invoked in order to create tuple subclasses.
-    """
-
-    @classmethod
-    def _wraps(mcls):
-        ''' Bypass the overridden __new__ method.
-            The overridden __new__ method is only invoked
-            once Python tries to create a subclass of 'namedtuple'
-
-            We include (tuple,) as a base so the
-            transitive property still holds true.
-            if issubclass(a, b) and issubclass(b, c):
-                assert issubclass(a, c)
-        '''
-        return ABCMeta.__new__(mcls, 'namedtuple', (tuple,), {})
-
+class namedtuple_meta(ABCMeta):
     def __new__(mcls, name, bases, dct):
-        ''' Once the surrogate that is returned from "_wraps"
-            gets subclassed we run this function.  This is like
-            a class decorator, but one which operates BEFORE
-            the class is created rather than after.
-        '''
-
         _fields = dct.pop('_fields', None)
         __slots__ = dct.pop('__slots__', ())
 
         if _fields is None:
-            raise TypeError("Missing required attribute '_fields'")
+            raise TypeError("Missing required attribute '_fields' for subtype of 'namedtuple'")
         if len(bases) > 1:
             raise TypeError("multiple inheritance not supported for subtype of 'namedtuple'")
         if __slots__ != ():
             raise TypeError("nonempty __slots__ not supported for subtype of 'tuple'")
 
+        # Create old-school named tuple.  Monkeypatch before returning
         nt = orig_namedtuple(name, _fields)
-        for key in dct:
-            setattr(nt, key, dct[key])
+        for key, value in dct.items():
+            setattr(nt, key, value)
         namedtuple.register(nt)
         return nt
 
@@ -53,4 +31,4 @@ class namedtuple_surrogate(ABCMeta):
         namedtuple.register(nt)
         return nt
 
-namedtuple = namedtuple_surrogate._wraps()
+namedtuple = ABCMeta.__new__(namedtuple_meta, 'namedtuple', (tuple,), {})

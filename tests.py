@@ -188,7 +188,7 @@ class test_namedtuple_conventions_strictly_enforced(unittest.TestCase):
 
     def test_non_empty_slots_is_prohibited(self):
         def block():
-            class Blah3(namedtuple, object):
+            class Blah3(namedtuple):
                 __slots__ = ('abs',)
                 _fields = ('x','y')
         self.assertRaises(TypeError, block)
