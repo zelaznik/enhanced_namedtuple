@@ -15,6 +15,7 @@ class namedtuple_meta(ABCMeta):
             return mcls.__instance
         except AttributeError:
             cls = ABCMeta.__new__(mcls, 'namedtuple', (tuple,), {})
+            cls.__module__ = __name__
             mcls.__instance = cls
             return cls
 
